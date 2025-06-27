@@ -1,0 +1,372 @@
+/* Banner.module.css */
+
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 500px;
+  overflow: hidden;
+}
+
+/* Carousel Styles */
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Overlay for better text readability */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  z-index: 2;
+}
+
+/* Search Overlay */
+.searchOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  padding: 2rem;
+}
+
+.searchContainer {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+}
+
+.bannerTitle {
+  font-size: 4rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  line-height: 1.2;
+}
+
+.bannerSubtitle {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 3rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: 300;
+}
+
+/* Search Form */
+.searchForm {
+  width: 100%;
+}
+
+.searchInputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50px;
+  padding: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  background: transparent;
+  color: #333;
+  border-radius: 50px;
+}
+
+.searchInput::placeholder {
+  color: #666;
+  font-weight: 400;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+}
+
+.clearButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.searchButton {
+  background: linear-gradient(45deg, #ff9800, #ffc107);
+  border: none;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+}
+
+.searchButton:hover {
+  background: linear-gradient(45deg, #f57c00, #ff9800);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
+.searchButton:active {
+  transform: translateY(0);
+}
+
+.searchButtonText {
+  display: inline;
+}
+
+/* Navigation Arrows */
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  padding: 1rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  z-index: 4;
+  backdrop-filter: blur(10px);
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prevButton {
+  left: 2rem;
+}
+
+.nextButton {
+  right: 2rem;
+}
+
+/* Slide Indicators */
+.indicators {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 4;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.activeIndicator {
+  background: white;
+  border-color: white;
+}
+
+.indicator:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .bannerTitle {
+    font-size: 3.5rem;
+  }
+  
+  .bannerSubtitle {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .bannerContainer {
+    height: 80vh;
+    min-height: 400px;
+  }
+  
+  .bannerTitle {
+    font-size: 3rem;
+  }
+  
+  .bannerSubtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .navButton {
+    font-size: 1.5rem;
+    padding: 0.75rem;
+  }
+  
+  .prevButton {
+    left: 1rem;
+  }
+  
+  .nextButton {
+    right: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .bannerContainer {
+    height: 70vh;
+    min-height: 350px;
+  }
+  
+  .searchOverlay {
+    padding: 1rem;
+  }
+  
+  .bannerTitle {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .bannerSubtitle {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .searchInputGroup {
+    flex-direction: row;
+    gap: 0;
+    padding: 0.5rem;
+    border-radius: 25px;
+  }
+  
+  .searchInput {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .searchButton {
+    width: auto;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .clearButton {
+    margin-right: 0.5rem;
+  }
+  
+  .navButton {
+    display: none;
+  }
+  
+  .indicators {
+    bottom: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .bannerContainer {
+    height: 60vh;
+    min-height: 300px;
+  }
+  
+  .bannerTitle {
+    font-size: 2rem;
+  }
+  
+  .bannerSubtitle {
+    font-size: 1rem;
+  }
+  
+  .searchInput {
+    font-size: 0.9rem;
+    padding: 1rem;
+  }
+  
+  .searchButton {
+    padding: 0.75rem 1.5rem;
+    min-width: auto;
+    white-space: nowrap;
+  }
+  
+  .searchButtonText {
+    display: inline;
+  }
+}
+
+@media (max-width: 400px) {
+  .searchOverlay {
+    padding: 0.5rem;
+  }
+  
+  .bannerTitle {
+    font-size: 1.8rem;
+  }
+  
+  .searchInputGroup {
+    padding: 0.75rem;
+  }
+}
