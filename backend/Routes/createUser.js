@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const user = require("../models/User");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const jwtSecret = "thijsfsfcvdv sdbfkgdbsdbvmbsdmvbsdm";
 
 // Validation rules
 const validateUser = [
@@ -39,13 +42,6 @@ const validateUser = [
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
-
-  body("confirmPassword").custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error("Passwords do not match");
-    }
-    return true;
-  }),
 ];
 
 // Validation rules for login
@@ -69,14 +65,16 @@ router.post("/createuser", validateUser, async (req, res) => {
       });
     }
 
-    const { name, email, address, password, confirmPassword } = req.body;
+    const { name, email, address, password } = req.body;
+
+    const salt = await bcrypt.genSalt(12);
+    const secPassword = await bcrypt.hash(password, salt);
 
     await user.create({
       name: name,
       email: email,
       address: address,
-      password: password,
-      confirmPassword: confirmPassword,
+      password: secPassword,
     });
 
     res.json({ success: true, message: "User created successfully" });
@@ -104,6 +102,7 @@ router.post("/loginuser", validateLogin, async (req, res) => {
 
     // Find user by email
     const userData = await user.findOne({ email });
+
     if (!userData) {
       return res.status(401).json({
         success: false,
@@ -111,13 +110,28 @@ router.post("/loginuser", validateLogin, async (req, res) => {
       });
     }
 
-    if (password !== userData.password) {
+    // Fix: Use bcrypt.compare for password comparison
+    const isPasswordValid = await bcrypt.compare(password, userData.password);
+    if (!isPasswordValid) {
       return res.status(401).json({
-        errors: "Try logging with correct credentials",
+        success: false,
+        message: "Invalid email or password",
       });
     }
 
-    return res.json({ success: true });
+    const data = {
+      user: {
+        id: userData.id,
+      },
+    };
+
+    const authToken = jwt.sign(data, jwtSecret);
+
+    return res.json({
+      success: true,
+      message: "Login successful",
+      authToken: authToken,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -126,5 +140,10 @@ router.post("/loginuser", validateLogin, async (req, res) => {
     });
   }
 });
+
+
+
+
+
 
 module.exports = router;

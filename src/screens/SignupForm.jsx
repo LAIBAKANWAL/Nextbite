@@ -21,6 +21,9 @@ const SignupForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // NEW STATE: For the terms and conditions checkbox
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+
   // Validation regex patterns
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const nameRegex = /^[a-zA-Z\s]{2,50}$/;
@@ -55,11 +58,11 @@ const SignupForm = () => {
   // Get current location for address
   const getCurrentLocation = async () => {
     setIsLocationLoading(true);
-    
+
     if (!navigator.geolocation) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        address: "Geolocation is not supported by this browser"
+        address: "Geolocation is not supported by this browser",
       }));
       setIsLocationLoading(false);
       return;
@@ -68,41 +71,39 @@ const SignupForm = () => {
     const options = {
       enableHighAccuracy: true,
       timeout: 10000,
-      maximumAge: 0
+      maximumAge: 0,
     };
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          
-          // Using OpenStreetMap Nominatim API for reverse geocoding (free)
+
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
           );
-          
+
           if (response.ok) {
             const data = await response.json();
             const address = data.display_name || `${latitude}, ${longitude}`;
-            
-            setFormData(prev => ({
+
+            setFormData((prev) => ({
               ...prev,
-              address: address
+              address: address,
             }));
-            
-            // Clear any previous address errors
-            setErrors(prev => ({
+
+            setErrors((prev) => ({
               ...prev,
-              address: ""
+              address: "",
             }));
           } else {
             throw new Error("Failed to get address");
           }
         } catch (error) {
           console.error("Error getting address:", error);
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            address: "Failed to get address. Please enter manually."
+            address: "Failed to get address. Please enter manually.",
           }));
         } finally {
           setIsLocationLoading(false);
@@ -111,7 +112,7 @@ const SignupForm = () => {
       (error) => {
         console.error("Geolocation error:", error);
         let errorMessage = "Failed to get location. Please enter address manually.";
-        
+
         switch (error.code) {
           case error.PERMISSION_DENIED:
             errorMessage = "Location access denied. Please enter address manually.";
@@ -122,11 +123,13 @@ const SignupForm = () => {
           case error.TIMEOUT:
             errorMessage = "Location request timed out. Please enter address manually.";
             break;
+          default:
+            break;
         }
-        
-        setErrors(prev => ({
+
+        setErrors((prev) => ({
           ...prev,
-          address: errorMessage
+          address: errorMessage,
         }));
         setIsLocationLoading(false);
       },
@@ -134,8 +137,8 @@ const SignupForm = () => {
     );
   };
 
-  // Field validation
-  const validateField = (name, value) => {
+  // Field validation (keeping it synchronous for client-side validation)
+  const validateField = (name, value, formData = {}) => {
     switch (name) {
       case "name":
         if (!value.trim()) {
@@ -192,41 +195,68 @@ const SignupForm = () => {
 
   // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, type, checked } = e.target;
 
-    // Real-time validation for touched fields
-    if (touched[name]) {
-      const fieldError = validateField(name, value);
-      setErrors(prev => ({
+    // Handle checkbox separately
+    if (type === "checkbox") {
+      setAgreeToTerms(checked);
+    } else {
+      setFormData((prev) => ({
         ...prev,
-        [name]: fieldError,
+        [name]: value,
       }));
-    }
 
-    // Special case: validate confirm password when password changes
-    if (name === "password" && touched.confirmPassword) {
-      const confirmPasswordError = validateField("confirmPassword", formData.confirmPassword);
-      setErrors(prev => ({
-        ...prev,
-        confirmPassword: confirmPasswordError,
-      }));
+      // Real-time validation for touched fields
+      if (touched[name]) {
+        const fieldError = validateField(name, value, formData);
+        setErrors((prev) => ({
+          ...prev,
+          [name]: fieldError,
+        }));
+      }
+
+      // Special case: validate confirm password when password changes
+      if (name === "password" && touched.confirmPassword) {
+        const confirmPasswordError = validateField(
+          "confirmPassword",
+          formData.confirmPassword,
+          { ...formData, password: value }
+        );
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: confirmPasswordError,
+        }));
+      }
+
+      // Clear submit error AND duplicate email error when user makes changes to email field
+      if (name === "email") {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.email; // Clear existing email error including duplicate
+          delete newErrors.submit; // Clear general submit error as well
+          return newErrors;
+        });
+      } else if (errors.submit) {
+        // Clear general submit error for other fields
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.submit;
+          return newErrors;
+        });
+      }
     }
   };
 
-  // Handle input blur
+  // Handle field blur
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    setTouched(prev => ({
+    setTouched((prev) => ({
       ...prev,
       [name]: true,
     }));
 
-    const fieldError = validateField(name, value);
-    setErrors(prev => ({
+    const fieldError = validateField(name, value, formData);
+    setErrors((prev) => ({
       ...prev,
       [name]: fieldError,
     }));
@@ -235,104 +265,150 @@ const SignupForm = () => {
   // Validate entire form
   const validateForm = () => {
     const newErrors = {};
-    Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key]);
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key], formData);
       if (error) newErrors[key] = error;
     });
+
+    // Add validation for terms and conditions checkbox
+    if (!agreeToTerms) {
+        newErrors.terms = "You must agree to the Terms & Conditions";
+    }
+
     return newErrors;
   };
 
   // Handle form submission
- // Replace the handleSubmit function in your SignupForm component with this updated version:
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    // Mark all fields as touched
+    setTouched({
+      name: true,
+      email: true,
+      address: true,
+      password: true,
+      confirmPassword: true,
+    });
 
-  // Mark all fields as touched
-  setTouched({
-    name: true,
-    email: true,
-    address: true,
-    password: true,
-    confirmPassword: true,
-  });
+    // Validate form
+    const formErrors = validateForm();
+    setErrors(formErrors);
 
-  // Validate form
-  const formErrors = validateForm();
-  setErrors(formErrors);
+    // If no errors, proceed with submission
+    if (Object.keys(formErrors).length === 0) {
+      setIsLoading(true);
 
-  // If no errors, proceed with submission
-  if (Object.keys(formErrors).length === 0) {
-    setIsLoading(true);
+      try {
+        const credentials = {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          address: formData.address,
+        };
 
-    try {
-      // Prepare credentials object matching your API structure
-      const credentials = {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        address: formData.address,
-        confirmPassword: formData.confirmPassword
-      };
-
-      // Make actual API call
-      const response = await fetch("http://localhost:5000/api/createuser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const json = await response.json();
-      console.log(json);
-
-      if (json.success) {
-        alert("Account created successfully!");
-        
-        // Reset form on success
-        setFormData({
-          name: "",
-          email: "",
-          address: "",
-          password: "",
-          confirmPassword: "",
+        const response = await fetch("http://localhost:5000/api/createuser", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
         });
-        setTouched({});
-        setErrors({});
-        
-        // Optional: Redirect to login page or dashboard
-        // window.location.href = '/login';
-        
-      } else {
-        // Handle API validation errors
-        if (json.errors) {
-          // If your API returns field-specific errors
-          const apiErrors = {};
-          json.errors.forEach(error => {
-            // Assuming error format: { field: 'email', msg: 'Email already exists' }
-            apiErrors[error.field] = error.msg;
+
+        const json = await response.json();
+        console.log(json);
+
+        if (response.ok && json.success) {
+          alert("Account created successfully!");
+          setFormData({
+            name: "",
+            email: "",
+            address: "",
+            password: "",
+            confirmPassword: "",
           });
-          setErrors(prev => ({ ...prev, ...apiErrors }));
+          setTouched({});
+          setErrors({});
+          // NEW: Reset checkbox state on successful signup
+          setAgreeToTerms(false);
         } else {
-          // Generic error message
-          setErrors({ submit: json.message || "Account creation failed. Please try again." });
+          // Check if there are 'errors' array from express-validator
+          if (json.errors && Array.isArray(json.errors)) {
+            const apiErrors = {};
+            json.errors.forEach((error) => {
+              const fieldName = error.path; // Corrected: using error.path
+              const errorMessage = error.msg;
+
+              if (fieldName === "email" && errorMessage === "Email already in use") {
+                apiErrors.email = "This email is already registered. Please use a different email or try logging in.";
+              } else {
+                apiErrors[fieldName] = errorMessage;
+              }
+            });
+
+            setErrors((prev) => ({ ...prev, ...apiErrors }));
+
+            if (apiErrors.email) {
+              const emailField = document.querySelector('input[name="email"]');
+              if (emailField) {
+                emailField.focus();
+                emailField.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            }
+          }
+          // The 'else if (json.message)' block is still useful for other generic errors,
+          // but the primary duplicate email error will now be caught by the 'json.errors' block.
+          else if (json.message) {
+            if (json.message.toLowerCase().includes("email already in use")) {
+              setErrors((prev) => ({
+                ...prev,
+                email: "This email is already registered. Please use a different email or try logging in.",
+              }));
+              const emailField = document.querySelector('input[name="email"]');
+              if (emailField) {
+                emailField.focus();
+                emailField.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            } else {
+              setErrors({ submit: json.message });
+            }
+          } else {
+            setErrors({ submit: "Account creation failed. Please try again." });
+          }
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          setErrors({ submit: "Unable to connect to server. Please check your connection and try again." });
+        } else if (error.name === "SyntaxError") {
+          setErrors({ submit: "Server response error. Please try again." });
+        } else {
+          setErrors({ submit: "Account creation failed. Please try again." });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Focus on the first error field
+      const firstErrorField = Object.keys(formErrors)[0];
+      if (firstErrorField) {
+        // Special handling for terms error, focus on checkbox
+        if (firstErrorField === "terms") {
+            const termsCheckbox = document.querySelector(`input[type="checkbox"]`);
+            if (termsCheckbox) {
+                termsCheckbox.focus();
+                termsCheckbox.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        } else {
+            const fieldElement = document.querySelector(`input[name="${firstErrorField}"]`);
+            if (fieldElement) {
+                fieldElement.focus();
+                fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         }
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-      
-      // Handle network errors
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setErrors({ submit: "Unable to connect to server. Please check your connection and try again." });
-      } else {
-        setErrors({ submit: "Account creation failed. Please try again." });
-      }
-    } finally {
-      setIsLoading(false);
     }
-  }
-};
+  };
 
   return (
     <div>
@@ -408,7 +484,7 @@ const handleSubmit = async (e) => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  onBlur={handleBlur}
+                  onBlur={handleBlur} 
                   placeholder="Enter your email address"
                   className={`${styles.input} ${
                     errors.email ? styles.inputError : ""
@@ -502,7 +578,7 @@ const handleSubmit = async (e) => {
                   >
                     {showPassword ? (
                       <svg className={styles.eyeIcon} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path d="M10 12a2 0 100-4 2 2 0 000 4z" />
                         <path
                           fillRule="evenodd"
                           d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
@@ -556,7 +632,7 @@ const handleSubmit = async (e) => {
                   >
                     {showConfirmPassword ? (
                       <svg className={styles.eyeIcon} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                        <path d="M10 12a2 0 100-4 2 2 0 000 4z" />
                         <path
                           fillRule="evenodd"
                           d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
@@ -590,7 +666,9 @@ const handleSubmit = async (e) => {
                     type="checkbox"
                     className={styles.checkbox}
                     disabled={isLoading}
-                    required
+                    // NEW: Bind checked state and onChange handler
+                    checked={agreeToTerms}
+                    onChange={handleChange}
                   />
                   <span className={styles.checkboxLabel}>
                     I agree to the{" "}
@@ -603,6 +681,13 @@ const handleSubmit = async (e) => {
                     </a>
                   </span>
                 </label>
+                {/* NEW: Display terms error if it exists */}
+                {errors.terms && (
+                  <p className={styles.errorMessage}>
+                    <span className={styles.errorIcon}>⚠️</span>
+                    {errors.terms}
+                  </p>
+                )}
               </div>
 
               {/* Submit Error */}
@@ -639,13 +724,13 @@ const handleSubmit = async (e) => {
                   Already have an account?{" "}
                 </span>
                 <Link to="/login">
-                <button
-                  type="button"
-                  className={styles.signInButton}
-                  disabled={isLoading}
-                >
-                  Sign In
-                </button>
+                  <button
+                    type="button"
+                    className={styles.signInButton}
+                    disabled={isLoading}
+                  >
+                    Sign In
+                  </button>
                 </Link>
               </div>
             </form>

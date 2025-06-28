@@ -66,7 +66,7 @@ const LoginForm = () => {
         if (!value) {
           return "Password is required";
         }
-        if (value.length < 6) {
+        if (value.length < 8) {
           return "Password must be at least 6 characters long";
         }
         return "";
@@ -167,6 +167,9 @@ const LoginForm = () => {
         setTouched({});
         setErrors({});
         
+
+        localStorage.setItem('authToken', json.authToken)
+        console.log(localStorage.getItem('authToken'))
         navigate('/')
 
       } else {
