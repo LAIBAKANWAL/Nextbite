@@ -7,28 +7,28 @@ const mongoDB = async () => {
   try {
     await mongoose.connect(mongoURI);
     console.log("✅ Connected to MongoDB Atlas successfully!");
-    // const fetchedData = await mongoose.connection.db.collection("products");
-    // fetchedData.find({}).toArray(function(err, data){
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     console.log(data);
-    //   }
-    // });
 
+    // Get the collections
+    const productsCollection = mongoose.connection.db.collection("products");
+    const categoriesCollection = mongoose.connection.db.collection("categories");
 
-     // Get the collection
-    const collection = mongoose.connection.db.collection("products");
-    
     // Fetch data using async/await (modern approach)
-    const data = await collection.find({}).toArray();
-    
-    if (data.length > 0) {
-      // console.log("📦 Products data:", data);
-      console.log(`Found ${data.length} products`);
+    const [productsData, categoriesData] = await Promise.all([
+      productsCollection.find({}).toArray(),
+      categoriesCollection.find({}).toArray()
+    ]);
+
+    if (productsData.length > 0) {
+      console.log(`📦 Found ${productsData.length} products`);
+      global.foodItems = productsData;
+      global.foodCategories = categoriesData;
+      console.log(`📂 Found ${categoriesData.length} categories`);
     } else {
       console.log("⚠️ No products found in the collection");
+      global.foodItems = [];
+      global.foodCategories = categoriesData; // Still set categories even if no products
     }
+
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);
     process.exit(1); // Exit the application if database connection fails

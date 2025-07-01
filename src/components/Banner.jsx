@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/Banner.module.css";
 
-const Banner = () => {
+// Accept setSearchQuery prop
+const Banner = ({ setSearchQuery }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [localSearchQuery, setLocalSearchQuery] = useState(""); // Use local state for input control
 
   // Sample images - replace with your actual image URLs
   const images = [
@@ -14,7 +15,6 @@ const Banner = () => {
   ];
 
 
- 
   // Auto-slide functionality
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,13 +37,21 @@ const Banner = () => {
   };
 
   const clearSearch = () => {
-    setSearchQuery("");
+    setLocalSearchQuery(""); // Clear local input
+    setSearchQuery(""); // Clear parent's search query
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setLocalSearchQuery(query); // Update local input state
+    setSearchQuery(query); // Propagate to parent Home component immediately
   };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Handle search functionality here
-    console.log("Search query:", searchQuery);
+    // The search query is already being updated on each keystroke
+    // If you need to trigger something *only* on submit, add it here.
+    // console.log("Search submitted:", localSearchQuery);
   };
 
   const handleBannerClick = (e) => {
@@ -89,11 +97,11 @@ const Banner = () => {
               <input
                 type="text"
                 placeholder="Search for recipes, ingredients, or cuisines..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={localSearchQuery} // Use local state for value
+                onChange={handleSearchChange} // Use new handler
                 className={styles.searchInput}
               />
-              {searchQuery && (
+              {localSearchQuery && ( // Check localSearchQuery for clear button
                 <button
                   type="button"
                   onClick={clearSearch}
@@ -103,10 +111,10 @@ const Banner = () => {
                   <i className="bi bi-x"></i>
                 </button>
               )}
-              <button type="submit" className={styles.searchButton}>
+              {/* <button type="submit" className={styles.searchButton}>
                 <i className="bi bi-search"></i>
                 <span className={styles.searchButtonText}>Search</span>
-              </button>
+              </button> */}
             </div>
           </form>
         </div>
