@@ -7,18 +7,21 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignupForm from "./screens/SignupForm";
+import { CartProvider } from "./components/ContextReducer";
+import MyOrder from "./screens/MyOrder";
 
 const App = () => {
   return (
-    <div>
+    <CartProvider>
       <Router>
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/login" element={<LoginForm />} />
           <Route exact path="/signup" element={<SignupForm />} />
+          <Route exact path="/myorder" element={<MyOrder/>} />
         </Routes>
       </Router>
-    </div>
+    </CartProvider>
   );
 };
 

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/Navbar.module.css";
 import { Link, useLocation } from "react-router-dom";
+import Modal from "../Modal";
+import MyCart from "../screens/MyCart";
+import { useCart } from "./ContextReducer";
 
 const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
+  const [cartView, setCartView] = useState(false);
+
+  let data = useCart();
 
   // Check authentication status
   useEffect(() => {
@@ -22,13 +28,13 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
       checkAuth();
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    
+    window.addEventListener("storage", handleStorageChange);
+
     // Also check periodically in case localStorage changes in same tab
     const interval = setInterval(checkAuth, 1000);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
   }, []);
@@ -48,6 +54,22 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
     };
   }, []);
 
+  // Handle window resize to close mobile menu on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isMenuOpen) {
+        closeMenu();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMenuOpen, closeMenu]);
+
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -62,10 +84,18 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
     return location.pathname === path;
   };
 
+  // Handle cart close - closes modal and mobile menu
+  const handleCartClose = () => {
+    setCartView(false);
+    closeMenu(); // Also close mobile menu when cart closes
+  };
+
   return (
-    <nav className={`${styles.navbarCustom} ${
-      isScrolled ? styles.navbarScrolled : ""
-    }`}>
+    <nav
+      className={`${styles.navbarCustom} ${
+        isScrolled ? styles.navbarScrolled : ""
+      }`}
+    >
       <div className={styles.navbarContainer}>
         {/* Brand */}
         <Link className={styles.navbarBrand} to="/">
@@ -74,21 +104,21 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
 
         {/* Navigation Links - Left side */}
         <div className={styles.navLinks}>
-          <Link 
+          <Link
             className={`${styles.navLink} ${
               isActiveLink("/") ? styles.active : ""
-            }`} 
+            }`}
             to="/"
           >
             Home
           </Link>
           {/* My Orders - show only if authenticated */}
           {isAuthenticated && (
-            <Link 
+            <Link
               className={`${styles.navLink} ${
                 isActiveLink("/my-orders") ? styles.active : ""
-              }`} 
-              to="/my-orders"
+              }`}
+              to="/myorder"
             >
               My Orders
             </Link>
@@ -113,28 +143,29 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
           {!isAuthenticated ? (
             <>
               <Link to="/login">
-                <button className={styles.btnSecondary}>
-                  Login
-                </button>
+                <button className={styles.btnSecondary}>Login</button>
               </Link>
               <Link to="/signup">
-                <button className={styles.btnPrimary}>
-                  Signup
-                </button>
+                <button className={styles.btnPrimary}>Signup</button>
               </Link>
             </>
           ) : (
             /* Show Cart/Logout if authenticated */
             <>
-              <Link to="/cart">
-                <button className={styles.btnSecondary}>
-                  My Cart
-                </button>
-              </Link>
-              <button 
-                className={styles.btnPrimary}
-                onClick={handleLogout}
+              <button
+                className={`${styles.btnCartIcon} position-relative`}
+                aria-label="My Cart"
+                onClick={() => setCartView(true)}
               >
+                <i className="bi bi-cart3"></i>
+                {data.length > 0 && (
+                  <span className="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                    {data.length}
+                  </span>
+                )}
+              </button>
+
+              <button className={styles.btnPrimary} onClick={handleLogout}>
                 Logout
               </button>
             </>
@@ -142,11 +173,15 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className={`${styles.mobileMenu} ${isMenuOpen ? styles.mobileMenuOpen : ""}`}>
-          <Link 
+        <div
+          className={`${styles.mobileMenu} ${
+            isMenuOpen ? styles.mobileMenuOpen : ""
+          }`}
+        >
+          <Link
             className={`${styles.mobileNavLink} ${
               isActiveLink("/") ? styles.active : ""
-            }`} 
+            }`}
             to="/"
             onClick={closeMenu}
           >
@@ -154,17 +189,17 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
           </Link>
           {/* My Orders - show only if authenticated */}
           {isAuthenticated && (
-            <Link 
+            <Link
               className={`${styles.mobileNavLink} ${
                 isActiveLink("/my-orders") ? styles.active : ""
-              }`} 
-              to="/my-orders"
+              }`}
+              to="/myorder"
               onClick={closeMenu}
             >
               My Orders
             </Link>
           )}
-          
+
           <div className={styles.mobileButtons}>
             {/* Show Login/Signup if not authenticated */}
             {!isAuthenticated ? (
@@ -183,15 +218,19 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
             ) : (
               /* Show Cart/Logout if authenticated */
               <>
-                <Link to="/cart">
-                  <button className={styles.btnSecondary} onClick={closeMenu}>
-                    My Cart
-                  </button>
-                </Link>
-                <button 
-                  className={styles.btnPrimary}
-                  onClick={handleLogout}
+                <button
+                  className={`${styles.btnCartIcon} position-relative`}
+                  aria-label="My Cart"
+                  onClick={() => setCartView(true)}
                 >
+                  <i className="bi bi-cart3"></i>
+                  {data.length > 0 && (
+                    <span className="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger">
+                      {data.length}
+                    </span>
+                  )}
+                </button>
+                <button className={styles.btnPrimary} onClick={handleLogout}>
                   Logout
                 </button>
               </>
@@ -199,6 +238,13 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
           </div>
         </div>
       </div>
+
+      {/* Cart Modal - Single instance outside of navbar structure */}
+      {cartView && (
+        <Modal onClose={handleCartClose}>
+          <MyCart isModal={true} onClose={handleCartClose} />
+        </Modal>
+      )}
     </nav>
   );
 };

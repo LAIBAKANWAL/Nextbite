@@ -44,7 +44,6 @@ const Home = () => {
         }
 
         const data = await response.json();
-        console.log("API Response:", data);
 
         // Extract food items and categories from response
         const foodItems = data[0] || [];
@@ -52,12 +51,7 @@ const Home = () => {
 
         setFoodData(foodItems);
         setCategories(foodCategories);
-
-        console.log("Food Items:", foodItems);
-        console.log("Categories:", foodCategories);
-
       } catch (error) {
-        console.error("Error fetching food data:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -91,14 +85,19 @@ const Home = () => {
     const lowerCaseSearchQuery = searchQuery.toLowerCase();
 
     return foodData.filter((product) => {
-      const matchesCategory = product.CategoryName === categoryName ||
-                              product.categoryName === categoryName ||
-                              product.category === categoryName;
+      // const matchesCategory = product.CategoryName === categoryName ||
+      //                         product.categoryName === categoryName ||
+      //                         product.category === categoryName;
+
+      const matchesCategory = product.categoryName === categoryName;
 
       // If there's a search query, filter by name or description as well
-      const matchesSearch = lowerCaseSearchQuery === "" ||
-                            (product.name && product.name.toLowerCase().includes(lowerCaseSearchQuery)) ||
-                            (product.desc && product.desc.toLowerCase().includes(lowerCaseSearchQuery));
+      const matchesSearch =
+        lowerCaseSearchQuery === "" ||
+        (product.name &&
+          product.name.toLowerCase().includes(lowerCaseSearchQuery)) ||
+        (product.desc &&
+          product.desc.toLowerCase().includes(lowerCaseSearchQuery));
 
       return matchesCategory && matchesSearch;
     });
@@ -115,7 +114,10 @@ const Home = () => {
         />
         {/* Pass setSearchQuery to Banner */}
         <Banner setSearchQuery={handleSearchQueryChange} />
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ minHeight: "400px" }}
+        >
           <div className="text-center">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
@@ -139,10 +141,15 @@ const Home = () => {
         />
         {/* Pass setSearchQuery to Banner */}
         <Banner setSearchQuery={handleSearchQueryChange} />
-        <div className="d-flex flex-column justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <div
+          className="d-flex flex-column justify-content-center align-items-center"
+          style={{ minHeight: "400px" }}
+        >
           <div className="text-center">
             <i className="bi bi-exclamation-triangle-fill text-danger fs-1 mb-3"></i>
-            <p className="text-danger fs-5 mb-3">Error loading food data: {error}</p>
+            <p className="text-danger fs-5 mb-3">
+              Error loading food data: {error}
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="btn btn-primary btn-lg"
@@ -170,14 +177,19 @@ const Home = () => {
       {/* Dynamic Category Rendering */}
       {categories.length > 0 ? (
         categories.map((category, index) => {
-          const categoryProducts = getProductsByCategory(category.CategoryName || category.categoryName || category.name);
+          {
+            /* const categoryProducts = getProductsByCategory(category.CategoryName || category.categoryName || category.name); */
+          }
 
+          const categoryProducts = getProductsByCategory(category.categoryName);
+      
           // Only render ProductSection if there are products in this category matching the search
           if (categoryProducts.length > 0) {
             return (
               <ProductSection
-                key={`${category.CategoryName || category.categoryName || category.name}-${index}`}
-                categoryName={category.CategoryName || category.categoryName || category.name}
+                // key={`${category.CategoryName || category.categoryName || category.name}-${index}`}
+                key={`${category.categoryName}-${index}`}
+                categoryName={category.categoryName}
                 products={categoryProducts}
                 loading={false}
               />
@@ -190,12 +202,19 @@ const Home = () => {
         <div className="container py-5">
           <div className="row justify-content-center">
             <div className="col-md-6 text-center">
-              <i className="bi bi-search text-muted" style={{ fontSize: '4rem' }}></i>
+              <i
+                className="bi bi-search text-muted"
+                style={{ fontSize: "4rem" }}
+              ></i>
               <h3 className="text-muted mt-3">
-                {searchQuery ? `No results found for "${searchQuery}"` : "No categories found"}
+                {searchQuery
+                  ? `No results found for "${searchQuery}"`
+                  : "No categories found"}
               </h3>
               <p className="text-muted">
-                {searchQuery ? "Please try a different search term or check for typos." : "We couldn't find any food categories at the moment. Please try refreshing the page."}
+                {searchQuery
+                  ? "Please try a different search term or check for typos."
+                  : "We couldn't find any food categories at the moment. Please try refreshing the page."}
               </p>
             </div>
           </div>

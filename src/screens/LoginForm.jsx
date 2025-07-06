@@ -166,8 +166,10 @@ const LoginForm = () => {
         });
         setTouched({});
         setErrors({});
-        
 
+        
+        localStorage.setItem('userEmail',formData.email)
+        console.log("kxasofsdfsdgf",localStorage.getItem('userEmail'))
         localStorage.setItem('authToken', json.authToken)
         console.log(localStorage.getItem('authToken'))
         navigate('/')
