@@ -1,3 +1,5 @@
+const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
 import React, { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
 import Navbar from "../components/Navbar";
@@ -5,7 +7,7 @@ import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
-  let navigate = useNavigate()
+  let navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,7 +21,6 @@ const LoginForm = () => {
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -121,88 +122,87 @@ const LoginForm = () => {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Mark all fields as touched
-  setTouched({
-    email: true,
-    password: true,
-  });
+    // Mark all fields as touched
+    setTouched({
+      email: true,
+      password: true,
+    });
 
-  // Validate form
-  const formErrors = validateForm();
-  setErrors(formErrors);
+    // Validate form
+    const formErrors = validateForm();
+    setErrors(formErrors);
 
-  // If no errors, proceed with submission
-  if (Object.keys(formErrors).length === 0) {
-    setIsLoading(true);
+    // If no errors, proceed with submission
+    if (Object.keys(formErrors).length === 0) {
+      setIsLoading(true);
 
-    try {
-      // Prepare credentials object matching your API structure
-      const credentials = {
-        email: formData.email,
-        password: formData.password,
-      };
+      try {
+        // Prepare credentials object matching your API structure
+        const credentials = {
+          email: formData.email,
+          password: formData.password,
+        };
 
-      // Make actual API call
-      const response = await fetch("http://localhost:5000/api/loginuser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const json = await response.json();
-      if (json.success) {
-        alert("Login successful!");
-        
-        // Reset form on success
-        setFormData({
-          email: "",
-          password: "",
+        // Make actual API call
+        const response = await fetch(`${BACKEND_BASE_URL}/api/loginuser`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
         });
-        setTouched({});
-        setErrors({});
 
-        
-        localStorage.setItem('userEmail',formData.email)
-        localStorage.setItem('authToken', json.authToken)
-        navigate('/')
+        const json = await response.json();
+        if (json.success) {
+          alert("Login successful!");
 
-      } else {
-        // Handle login failure
-        if (json.errors) {
-          // If API returns field-specific errors
-          const apiErrors = {};
-          json.errors.forEach(error => {
-            apiErrors[error.field] = error.msg;
+          // Reset form on success
+          setFormData({
+            email: "",
+            password: "",
           });
-          setErrors(prev => ({ ...prev, ...apiErrors }));
+          setTouched({});
+          setErrors({});
+
+          localStorage.setItem("userEmail", formData.email);
+          localStorage.setItem("authToken", json.authToken);
+          navigate("/");
         } else {
-          // Generic error message
-          setErrors({ 
-            submit: json.message || "Invalid email or password. Please try again." 
-          });
+          // Handle login failure
+          if (json.errors) {
+            // If API returns field-specific errors
+            const apiErrors = {};
+            json.errors.forEach((error) => {
+              apiErrors[error.field] = error.msg;
+            });
+            setErrors((prev) => ({ ...prev, ...apiErrors }));
+          } else {
+            // Generic error message
+            setErrors({
+              submit:
+                json.message || "Invalid email or password. Please try again.",
+            });
+          }
         }
+      } catch (error) {
+        console.error("Login error:", error);
+
+        // Handle network errors
+        if (error.name === "TypeError" && error.message.includes("fetch")) {
+          setErrors({
+            submit:
+              "Unable to connect to server. Please check your connection and try again.",
+          });
+        } else {
+          setErrors({ submit: "Login failed. Please try again." });
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      
-      // Handle network errors
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setErrors({ 
-          submit: "Unable to connect to server. Please check your connection and try again." 
-        });
-      } else {
-        setErrors({ submit: "Login failed. Please try again." });
-      }
-    } finally {
-      setIsLoading(false);
     }
-  }
-};
- 
+  };
 
   return (
     <div>
@@ -375,13 +375,13 @@ const LoginForm = () => {
                   Don't have an account?{" "}
                 </span>
                 <Link to="/signup">
-                <button
-                  type="button"
-                  className={styles.createAccountButton}
-                  disabled={isLoading}
-                >
-                  Create Account
-                </button>
+                  <button
+                    type="button"
+                    className={styles.createAccountButton}
+                    disabled={isLoading}
+                  >
+                    Create Account
+                  </button>
                 </Link>
               </div>
             </form>

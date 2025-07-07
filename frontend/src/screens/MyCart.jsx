@@ -1,3 +1,6 @@
+const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
+
 import React from "react";
 import { useCart, useDispatchCart } from "../components/ContextReducer";
 import { Link } from "react-router-dom";
@@ -21,7 +24,7 @@ const MyCart = ({ isModal = false, onClose }) => {
         return;
       }
 
-      let response = await fetch("http://localhost:5000/api/orderData", {
+        const response = await fetch(`${BACKEND_BASE_URL}/api/orderData`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,3 +1,5 @@
+const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
 import React, { useState, useEffect } from "react";
 import styles from "./SignupForm.module.css";
 import Navbar from "../components/Navbar";
