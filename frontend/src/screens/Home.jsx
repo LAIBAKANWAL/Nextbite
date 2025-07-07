@@ -1,3 +1,4 @@
+const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Banner from "../components/Banner"; // Import Banner
@@ -32,7 +33,7 @@ const Home = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("http://localhost:5000/api/foodData", {
+        const response = await fetch(`${BACKEND_BASE_URL}/api/foodData`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -177,9 +178,8 @@ const Home = () => {
       {/* Dynamic Category Rendering */}
       {categories.length > 0 ? (
         categories.map((category, index) => {
-        
           const categoryProducts = getProductsByCategory(category.categoryName);
-      
+
           // Only render ProductSection if there are products in this category matching the search
           if (categoryProducts.length > 0) {
             return (
