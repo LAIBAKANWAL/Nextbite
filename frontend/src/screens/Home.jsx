@@ -153,7 +153,8 @@ const Home = () => {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="btn btn-primary btn-lg"
+              className="btn btn-lg text-white"
+               style={{ backgroundColor: "#82ae46"}}
             >
               <i className="bi bi-arrow-clockwise me-2"></i>
               Retry
