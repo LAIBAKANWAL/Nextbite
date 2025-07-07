@@ -1,0 +1,574 @@
+/* SignupForm.module.css */
+
+.container {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.foodElement {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 50%;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 6s ease-in-out infinite;
+}
+
+.foodElement1 {
+  top: 3rem;
+  right: 6rem;
+  width: 9rem;
+  height: 9rem;
+  animation-delay: 0s;
+}
+
+.foodElement2 {
+  bottom: 12rem;
+  left: 3rem;
+  width: 7rem;
+  height: 7rem;
+  animation-delay: 2s;
+}
+
+.foodElement3 {
+  top: 8rem;
+  left: 10rem;
+  width: 6rem;
+  height: 6rem;
+  animation-delay: 4s;
+}
+
+.foodElement4 {
+  bottom: 6rem;
+  right: 8rem;
+  width: 8rem;
+  height: 8rem;
+  animation-delay: 1s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.foodImage {
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+}
+
+.foodImage1 {
+  width: 7rem;
+  height: 7rem;
+  background-image: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80');
+}
+
+.foodImage2 {
+  width: 5rem;
+  height: 5rem;
+  background-image: url('https://images.unsplash.com/photo-1464454709131-ffd692591ee5?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80');
+}
+
+.foodImage3 {
+  width: 4rem;
+  height: 4rem;
+  background-image: url('https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80');
+}
+
+.foodImage4 {
+  width: 6rem;
+  height: 6rem;
+  background-image: url('https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80');
+}
+
+.mainContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 0 1rem;
+  padding-top: 100px;
+  padding-bottom: 2rem;
+}
+
+.formContainer {
+  background-color: rgba(31, 41, 55, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 32rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, white, #82ae46);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: rgb(209, 213, 219);
+  font-size: 0.95rem;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(209, 213, 219);
+  margin-bottom: 0.5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background-color: rgba(55, 65, 81, 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(75, 85, 99, 0.6);
+  border-radius: 0.5rem;
+  color: white;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.input::placeholder {
+  color: rgb(156, 163, 175);
+}
+
+.input:focus {
+  outline: none;
+  border-color: #82ae46;
+  box-shadow: 0 0 0 3px rgba(130,174,70,0.3);
+  background-color: rgba(55, 65, 81, 0.95);
+}
+
+.inputError {
+  border-color: rgb(239, 68, 68);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+.inputDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Address field with location button */
+.addressContainer {
+  position: relative;
+}
+
+.addressInput {
+  padding-right: 3.5rem;
+}
+
+.locationButton {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(130,174,70);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locationButton:hover {
+  color: rgb(130,174,70);
+  background-color: rgba(130,174,70,0.1);
+}
+
+.locationButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.locationIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.locationSpinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid transparent;
+  border-top: 2px solid rgb(130,174,70);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Password fields */
+.passwordContainer {
+  position: relative;
+}
+
+.passwordInput {
+  padding-right: 3rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgb(156, 163, 175);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.passwordToggle:hover {
+  color: white;
+}
+
+.passwordToggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.eyeIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.errorMessage {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: rgb(248, 113, 113);
+  display: flex;
+  align-items: center;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.errorIcon {
+  margin-right: 0.25rem;
+}
+
+/* Terms & Conditions */
+.termsSection {
+  margin-top: 0.5rem;
+}
+
+.termsLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  color: rgb(130,174,70);
+  background-color: rgba(55, 65, 81, 0.8);
+  border: 1px solid rgba(75, 85, 99, 0.6);
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.checkbox:focus {
+  box-shadow: 0 0 0 2px rgb(130,174,70,0.5);
+}
+
+.checkboxLabel {
+  font-size: 0.875rem;
+  color: rgb(209, 213, 219);
+  line-height: 1.4;
+}
+
+.termsLink {
+  color: rgb(130,174,70);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.termsLink:hover {
+  color: rgb(156, 199, 97);
+  text-decoration: underline;
+}
+
+/* Submit Error */
+.submitError {
+  background-color: rgba(127, 29, 29, 0.5);
+  border: 1px solid rgb(239, 68, 68);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+.submitErrorText {
+  color: rgb(248, 113, 113);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+}
+
+.submitErrorIcon {
+  margin-right: 0.5rem;
+}
+
+/* Submit Button */
+.submitButton {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(130,174,70));
+  box-shadow: 0 4px 15px rgba(130,174,70,0.3);
+}
+
+.submitButton:hover {
+  background: linear-gradient(135deg, rgb(5, 150, 105), rgb(130,174,70));
+  box-shadow: 0 6px 20px rgba(130,174,70,0.4);
+  transform: translateY(-2px);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(130,174,70,0.3);
+}
+
+.submitButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(130,174,70,0.5), 0 4px 15px rgba(130,174,70,0.3);
+}
+
+.submitButtonDisabled {
+  background: rgb(75, 85, 99);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.submitButtonDisabled:hover {
+  background: rgb(75, 85, 99);
+  transform: none;
+  box-shadow: none;
+}
+
+.submitButtonDisabled:active {
+  transform: none;
+}
+
+.loadingContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid transparent;
+  border-bottom-color: white;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Existing User Section */
+.existingUserSection {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.existingUserText {
+  color: rgb(156, 163, 175);
+  font-size: 0.875rem;
+}
+
+.signInButton {
+  color: rgb(130,174,70);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.signInButton:hover {
+  color: rgb(156, 194, 102);
+}
+
+.signInButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mainContent {
+    padding-top: 120px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .formContainer {
+    margin-top: 0.5rem;
+    padding: 2rem;
+    max-width: 100%;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .foodElement1,
+  .foodElement2,
+  .foodElement3,
+  .foodElement4 {
+    display: none;
+  }
+  
+  .formFields {
+    gap: 1rem;
+  }
+  
+  .input {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainContent {
+    padding-top: 100px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .formContainer {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .input {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
+  }
+  
+  .addressInput {
+    padding-right: 3rem;
+  }
+  
+  .passwordInput {
+    padding-right: 2.75rem;
+  }
+  
+  .locationButton {
+    right: 0.5rem;
+  }
+  
+  .passwordToggle {
+    right: 0.5rem;
+  }
+  
+  .locationIcon,
+  .eyeIcon {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .locationSpinner {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+  .formContainer {
+    padding: 1.25rem;
+  }
+  
+  .title {
+    font-size: 1.375rem;
+  }
+  
+  .formFields {
+    gap: 0.875rem;
+  }
+}
