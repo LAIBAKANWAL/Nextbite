@@ -1,10 +1,13 @@
+require("dotenv").config();
+
 const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const user = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const jwtSecret = "thijsfsfcvdv sdbfkgdbsdbvmbsdmvbsdm";
+const jwtSecret = process.env.jwtSecret;
+
 
 // Validation rules
 const validateUser = [
@@ -79,7 +82,6 @@ router.post("/createuser", validateUser, async (req, res) => {
 
     res.json({ success: true, message: "User created successfully" });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Server error occurred",
@@ -133,7 +135,6 @@ router.post("/loginuser", validateLogin, async (req, res) => {
       authToken: authToken,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Server error occurred",

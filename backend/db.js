@@ -1,7 +1,7 @@
+
 const mongoose = require("mongoose");
 
-const mongoURI =
-  "mongodb+srv://nextbite_app:laiba12345678@nextbitecluster.lt9ower.mongodb.net/nextbite_db?retryWrites=true&w=majority&appName=NextBiteCluster";
+  const mongoURI = process.env.MONGODB_URI;
 
 const mongoDB = async () => {
   try {
@@ -19,12 +19,9 @@ const mongoDB = async () => {
     ]);
 
     if (productsData.length > 0) {
-      console.log(`📦 Found ${productsData.length} products`);
       global.foodItems = productsData;
       global.foodCategories = categoriesData;
-      console.log(`📂 Found ${categoriesData.length} categories`);
     } else {
-      console.log("⚠️ No products found in the collection");
       global.foodItems = [];
       global.foodCategories = categoriesData; // Still set categories even if no products
     }

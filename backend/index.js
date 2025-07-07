@@ -1,3 +1,5 @@
+// Load environment variables FIRST - at the very top of your main server file
+require('dotenv').config();
 const express = require('express')
 const app = express()
 const port = 5000

@@ -3,9 +3,7 @@ const router = express.Router();
 const Order = require('../models/Orders'); // Adjust path as needed
 
 router.post('/orderData', async (req, res) => {
-  try {
-    console.log('Received order data:', req.body); // Debug log
-    
+  try {    
     const { email, orderData, orderDate } = req.body;
     
     // Validate required fields
@@ -37,7 +35,6 @@ router.post('/orderData', async (req, res) => {
       }
     );
     
-    console.log('Order saved/updated successfully:', updatedOrder); // Debug log
     
     res.status(200).json({ 
       success: true, 
