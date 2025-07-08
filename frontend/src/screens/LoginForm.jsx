@@ -1,4 +1,3 @@
-const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 import React, { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
@@ -146,7 +145,7 @@ const LoginForm = () => {
         };
 
         // Make actual API call
-        const response = await fetch(`${BACKEND_BASE_URL}/api/loginuser`, {
+        const response = await fetch("/api/loginUser", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

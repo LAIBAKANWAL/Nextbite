@@ -1,4 +1,3 @@
-const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 import React, { useState, useEffect } from "react";
 import styles from "./SignupForm.module.css";
@@ -310,7 +309,7 @@ const SignupForm = () => {
           address: formData.address,
         };
 
-        const response = await fetch("http://localhost:5000/api/createuser", {
+        const response = await fetch("/api/createUser", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -1,4 +1,3 @@
-const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 
 import React from "react";
@@ -24,7 +23,7 @@ const MyCart = ({ isModal = false, onClose }) => {
         return;
       }
 
-        const response = await fetch(`${BACKEND_BASE_URL}/api/orderData`, {
+        const response = await fetch("/api/orderData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

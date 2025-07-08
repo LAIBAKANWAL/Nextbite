@@ -1,0 +1,44 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules/
+frontend/node_modules/ # Explicitly ignore frontend's node_modules if it exists
+api/node_modules/      # Explicitly ignore API's node_modules if it exists
+
+# Build output directories
+dist/           # For Vite frontend (or a generic dist if used elsewhere)
+dist-ssr/       # For SSR builds (if applicable)
+frontend/build/ # For Create React App frontend (if applicable)
+frontend/dist/  # For Vite frontend (if frontend is in a subdirectory)
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.production.local
+*.local # Catches any other .env.*.local files
+
+# Vercel related files
+.vercel/
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json # Don't ignore extensions.json within .vscode/
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Other common OS generated files
+Thumbs.db
+.vercel

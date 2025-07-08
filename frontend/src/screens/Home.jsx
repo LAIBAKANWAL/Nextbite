@@ -1,4 +1,3 @@
-const BACKEND_BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Banner from "../components/Banner"; // Import Banner
@@ -33,25 +32,50 @@ const Home = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${BACKEND_BASE_URL}/api/foodData`, {
-          method: "POST",
+        // 1. Fetch Food Items
+        const foodItemsResponse = await fetch("/api/foodData", {
+          method: "POST", // Or 'GET', based on your api/foodData.js
           headers: {
             "Content-Type": "application/json",
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!foodItemsResponse.ok) {
+          const errorDetails = await foodItemsResponse.json();
+          throw new Error(
+            `HTTP error! Status: ${foodItemsResponse.status}. Details: ${
+              errorDetails.message || JSON.stringify(errorDetails)
+            }`
+          );
         }
+        const foodItemsData = await foodItemsResponse.json();
 
-        const data = await response.json();
+        // 2. Fetch Food Categories
+        const foodCategoriesResponse = await fetch("/api/foodCategory", {
+          method: "POST", // Or 'GET', based on your api/foodCategory.js
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-        // Extract food items and categories from response
-        const foodItems = data[0] || [];
-        const foodCategories = data[1] || [];
+        if (!foodCategoriesResponse.ok) {
+          const errorDetails = await foodCategoriesResponse.json();
+          throw new Error(
+            `HTTP error! Status: ${foodCategoriesResponse.status}. Details: ${
+              errorDetails.message || JSON.stringify(errorDetails)
+            }`
+          );
+        }
+        const foodCategoriesData = await foodCategoriesResponse.json();
 
-        setFoodData(foodItems);
-        setCategories(foodCategories);
+        // Assuming both API endpoints return { success: true, data: [...] }
+        if (foodItemsData.success && foodCategoriesData.success) {
+          setFoodData(foodItemsData.data || []); // Access 'data' key for food items
+          setCategories(foodCategoriesData.data || []); // Access 'data' key for food categories
+        } else {
+          // This case handles if success: false is returned by the API but HTTP status is OK
+          throw new Error("API reported failure for food data or categories.");
+        }
       } catch (error) {
         setError(error.message);
       } finally {
@@ -154,7 +178,7 @@ const Home = () => {
             <button
               onClick={() => window.location.reload()}
               className="btn btn-lg text-white"
-               style={{ backgroundColor: "#82ae46"}}
+              style={{ backgroundColor: "#82ae46" }}
             >
               <i className="bi bi-arrow-clockwise me-2"></i>
               Retry
