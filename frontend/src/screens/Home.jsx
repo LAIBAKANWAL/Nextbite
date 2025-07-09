@@ -68,12 +68,20 @@ const Home = () => {
         }
         const foodCategoriesData = await foodCategoriesResponse.json();
 
+        // Debug: Log the API responses
+        console.log("🔍 Food Items Response:", foodItemsData);
+        console.log("🔍 Categories Response:", foodCategoriesData);
+        
         // Assuming both API endpoints return { success: true, data: [...] }
         if (foodItemsData.success && foodCategoriesData.success) {
           setFoodData(foodItemsData.data || []); // Access 'data' key for food items
           setCategories(foodCategoriesData.data || []); // Access 'data' key for food categories
+          
+          console.log("✅ Set food data:", foodItemsData.data?.length || 0, "items");
+          console.log("✅ Set categories:", foodCategoriesData.data?.length || 0, "categories");
         } else {
           // This case handles if success: false is returned by the API but HTTP status is OK
+          console.error("❌ API failure - Food Items Success:", foodItemsData.success, "Categories Success:", foodCategoriesData.success);
           throw new Error("API reported failure for food data or categories.");
         }
       } catch (error) {
@@ -201,9 +209,17 @@ const Home = () => {
       <Banner setSearchQuery={handleSearchQueryChange} />
 
       {/* Dynamic Category Rendering */}
+      {(() => {
+        console.log("🔍 Rendering - Categories length:", categories.length);
+        console.log("🔍 Categories data:", categories);
+        console.log("🔍 Food data length:", foodData.length);
+        return null;
+      })()}
+      
       {categories.length > 0 ? (
         categories.map((category, index) => {
           const categoryProducts = getProductsByCategory(category.categoryName);
+          console.log(`🔍 Category "${category.categoryName}" has ${categoryProducts.length} products`);
 
           // Only render ProductSection if there are products in this category matching the search
           if (categoryProducts.length > 0) {
