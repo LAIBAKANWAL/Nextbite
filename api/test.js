@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default function handler(req, res) {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -13,6 +13,7 @@ module.exports = async (req, res) => {
     success: true,
     message: "API is working!",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development"
+    environment: process.env.NODE_ENV || "development",
+    hasMongoUri: !!process.env.MONGODB_URI
   });
-};
+}
