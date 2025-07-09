@@ -6,9 +6,6 @@ require("dotenv").config();
 // Database connection
 const connectDB = require("./db"); // Adjust path if db.js is not directly in 'api/'
 
-// Connect to MongoDB
-connectDB();
-
 // Main Serverless Function Handler
 module.exports = async (req, res) => {
   // CORS Headers
@@ -28,6 +25,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Connect to MongoDB first to ensure global variables are set
+    await connectDB();
+
     // Use global variables set by db.js
     const foodItems = global.foodItems || [];
     const foodCategories = global.foodCategories || [];

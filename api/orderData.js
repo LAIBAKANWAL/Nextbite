@@ -7,9 +7,6 @@ require("dotenv").config();
 const connectDB = require("./db"); // Adjust path if db.js is not directly in 'api/'
 const Order = require("./models/Orders"); // Adjust path to your Order model relative to 'api/'
 
-// Connect to MongoDB
-connectDB();
-
 // Main Serverless Function Handler
 module.exports = async (req, res) => {
   // CORS Headers
@@ -29,6 +26,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Connect to MongoDB first
+    await connectDB();
+
     const { email, orderData, orderDate } = req.body;
 
     // Validate required fields
@@ -67,11 +67,11 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error saving order in /api/orderData:', error); // Better error logging for Vercel
+    console.error('Error saving order in /api/orderData:', error);
     res.status(500).json({
       success: false,
       message: 'Server Error: ' + error.message,
-      details: error.message // Include error message for debugging (remove in production if sensitive)
+      details: error.message
     });
   }
 };

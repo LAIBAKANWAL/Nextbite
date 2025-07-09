@@ -15,9 +15,6 @@ const jwt = require("jsonwebtoken");
 // JWT Secret (MUST be set as an environment variable in Vercel Dashboard)
 const jwtSecret = process.env.JWT_SECRET; // Renamed to JWT_SECRET for clarity
 
-// Connect to MongoDB
-connectDB();
-
 // Validation rules for login
 const validateLogin = [
   body("email")
@@ -54,6 +51,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Connect to MongoDB first
+    await connectDB();
+
     // Run validations
     const errors = await runValidation(req);
     if (!errors.isEmpty()) {
@@ -104,11 +104,11 @@ module.exports = async (req, res) => {
       authToken: authToken,
     });
   } catch (error) {
-    console.error("Error in /api/loginUser:", error); // Log the actual error
+    console.error("Error in /api/loginUser:", error);
     res.status(500).json({
       success: false,
       message: "Server error occurred",
-      details: error.message // Include error message for debugging (remove in production if sensitive)
+      details: error.message
     });
   }
 };

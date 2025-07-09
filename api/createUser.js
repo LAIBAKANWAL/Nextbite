@@ -11,13 +11,6 @@ const User = require("./models/User"); // Adjust path to your User model relativ
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
-// Assuming jwtSecret is an environment variable set in Vercel Dashboard
-// const jwtSecret = process.env.jwtSecret; // Not used in createUser, but keep it in mind
-
-// Connect to MongoDB
-// This function should handle idempotent connections (connects only if not already connected)
-connectDB();
-
 // Validation rules as a reusable array
 const validateUser = [
   body("name")
@@ -75,6 +68,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Connect to MongoDB first
+    await connectDB();
+
     // Run validations
     const errors = await runValidation(req);
     if (!errors.isEmpty()) {
@@ -87,9 +83,7 @@ module.exports = async (req, res) => {
 
     const { name, email, address, password } = req.body;
 
-    // Custom check for existing email (moved from custom validator to direct check)
-    // This needs to be outside express-validator's custom because it's async and happens
-    // after initial body parsing. Or you can leave it in custom but ensure it runs.
+    // Custom check for existing email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
         return res.status(400).json({
@@ -97,7 +91,6 @@ module.exports = async (req, res) => {
             message: "Email already in use"
         });
     }
-
 
     const salt = await bcrypt.genSalt(12);
     const secPassword = await bcrypt.hash(password, salt);
@@ -111,11 +104,11 @@ module.exports = async (req, res) => {
 
     res.status(201).json({ success: true, message: "User created successfully" });
   } catch (error) {
-    console.error("Error in /api/createUser:", error); // Log the actual error for debugging
+    console.error("Error in /api/createUser:", error);
     res.status(500).json({
       success: false,
       message: "Server error occurred",
-      details: error.message // Include error message for debugging (remove in production if sensitive)
+      details: error.message
     });
   }
 };
