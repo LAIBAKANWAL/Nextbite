@@ -13,13 +13,9 @@ module.exports = async (req, res) => {
     }
 
     console.log("🔍 Starting foodCategory function");
-    console.log("🔍 Environment variables check:");
-    console.log("  - NODE_ENV:", process.env.NODE_ENV);
-    console.log("  - MONGODB_URI exists:", !!process.env.MONGODB_URI);
-    console.log("  - MONGODB_URI length:", process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0);
     
     if (!process.env.MONGODB_URI) {
-      console.error("❌ MONGODB_URI not found in environment variables");
+      console.error("❌ MONGODB_URI not found");
       return res.status(500).json({
         success: false,
         message: "Database configuration error",
@@ -27,8 +23,8 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Test MongoDB connection
-    console.log("🔄 Attempting to connect to MongoDB...");
+    // Connect to MongoDB
+    console.log("🔄 Connecting to MongoDB...");
     const client = new MongoClient(process.env.MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 5000,
@@ -40,28 +36,69 @@ module.exports = async (req, res) => {
     const db = client.db();
     console.log("📋 Database name:", db.databaseName);
     
-    // Get categories collection
-    const categoriesCollection = db.collection("categories");
-    console.log("📦 Attempting to fetch categories...");
+    // Check what collections exist
+    const collections = await db.listCollections().toArray();
+    console.log("📂 Available collections:", collections.map(c => c.name));
     
-    const categories = await categoriesCollection.find({}).toArray();
-    console.log(`✅ Found ${categories.length} categories`);
+    // Try different possible collection names
+    const possibleNames = ['categories', 'category', 'Categories', 'Category', 'foodCategories'];
+    let categories = [];
+    let usedCollectionName = '';
+    
+    for (const collectionName of possibleNames) {
+      try {
+        console.log(`� Trying collection: ${collectionName}`);
+        const collection = db.collection(collectionName);
+        const count = await collection.countDocuments();
+        console.log(`📊 Collection '${collectionName}' has ${count} documents`);
+        
+        if (count > 0) {
+          categories = await collection.find({}).toArray();
+          usedCollectionName = collectionName;
+          console.log(`✅ Found data in collection: ${collectionName}`);
+          break;
+        }
+      } catch (error) {
+        console.log(`❌ Error checking collection '${collectionName}':`, error.message);
+      }
+    }
     
     if (categories.length > 0) {
+      console.log("🎉 Categories found!");
       console.log("🔍 Sample category:", JSON.stringify(categories[0], null, 2));
+      console.log("🔍 Category fields:", Object.keys(categories[0]));
+    } else {
+      console.log("❌ No categories found in any collection");
+      console.log("🔍 Available collections:", collections.map(c => c.name));
+      
+      // Check if collections have any data at all
+      for (const collection of collections) {
+        try {
+          const coll = db.collection(collection.name);
+          const count = await coll.countDocuments();
+          const sample = await coll.findOne();
+          console.log(`📊 Collection '${collection.name}': ${count} documents`);
+          if (sample) {
+            console.log(`🔍 Sample from '${collection.name}':`, JSON.stringify(sample, null, 2));
+          }
+        } catch (error) {
+          console.log(`❌ Error checking '${collection.name}':`, error.message);
+        }
+      }
     }
 
     await client.close();
-    console.log("🔒 MongoDB connection closed successfully");
+    console.log("🔒 MongoDB connection closed");
 
     return res.status(200).json({
       success: true,
       data: categories,
       debug: {
         categoriesCount: categories.length,
-        hasMongoUri: true,
-        timestamp: new Date().toISOString(),
-        dbName: db.databaseName
+        usedCollectionName: usedCollectionName,
+        availableCollections: collections.map(c => c.name),
+        databaseName: db.databaseName,
+        timestamp: new Date().toISOString()
       }
     });
 
