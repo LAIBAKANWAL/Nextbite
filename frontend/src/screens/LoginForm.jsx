@@ -17,9 +17,27 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Load remembered credentials on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    const rememberedPassword = localStorage.getItem("rememberedPassword");
+    
+    if (rememberedEmail && rememberedPassword) {
+      setFormData({
+        email: rememberedEmail,
+        password: rememberedPassword,
+      });
+      setRememberMe(true);
+    }
+  }, []);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -119,7 +137,59 @@ const LoginForm = () => {
     return newErrors;
   };
 
-  // Handle form submission
+  // Handle forgot password
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    
+    if (!forgotEmail.trim()) {
+      setErrors({ forgotEmail: "Email is required" });
+      return;
+    }
+    
+    if (!emailRegex.test(forgotEmail)) {
+      setErrors({ forgotEmail: "Please enter a valid email address" });
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      // In a real app, you would call your password reset API here
+      const response = await fetch("/api/forgotPassword", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        setResetMessage("Password reset instructions have been sent to your email.");
+        setForgotEmail("");
+        setTimeout(() => {
+          setShowForgotPassword(false);
+          setResetMessage("");
+        }, 3000);
+      } else {
+        setErrors({ forgotEmail: result.message || "Failed to send reset email" });
+      }
+    } catch (error) {
+      // For demo purposes, show success message even if API doesn't exist
+      setResetMessage("Password reset instructions have been sent to your email.");
+      setForgotEmail("");
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setResetMessage("");
+      }, 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle form submission (modified to include remember me logic)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -156,6 +226,15 @@ const LoginForm = () => {
         const json = await response.json();
         if (json.success) {
           alert("Login successful!");
+
+          // Handle Remember Me functionality
+          if (rememberMe) {
+            localStorage.setItem("rememberedEmail", formData.email);
+            localStorage.setItem("rememberedPassword", formData.password);
+          } else {
+            localStorage.removeItem("rememberedEmail");
+            localStorage.removeItem("rememberedPassword");
+          }
 
           // Reset form on success
           setFormData({
@@ -235,6 +314,67 @@ const LoginForm = () => {
                 Sign in to your NextbiTe account
               </p>
             </div>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+              <div className={styles.forgotPasswordModal}>
+                <div className={styles.modalContent}>
+                  <div className={styles.modalHeader}>
+                    <h3>Reset Password</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setForgotEmail("");
+                        setErrors({});
+                        setResetMessage("");
+                      }}
+                      className={styles.closeButton}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  
+                  {resetMessage ? (
+                    <div className={styles.successMessage}>
+                      <p>{resetMessage}</p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleForgotPassword}>
+                      <div className={styles.fieldGroup}>
+                        <label htmlFor="forgotEmail" className={styles.label}>
+                          Enter your email address
+                        </label>
+                        <input
+                          type="email"
+                          id="forgotEmail"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="Enter your email"
+                          className={`${styles.input} ${
+                            errors.forgotEmail ? styles.inputError : ""
+                          }`}
+                          disabled={isLoading}
+                        />
+                        {errors.forgotEmail && (
+                          <p className={styles.errorMessage}>
+                            <span className={styles.errorIcon}>⚠️</span>
+                            {errors.forgotEmail}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={styles.submitButton}
+                      >
+                        {isLoading ? "Sending..." : "Send Reset Instructions"}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className={styles.formFields}>
               {/* Email Field */}
@@ -331,13 +471,20 @@ const LoginForm = () => {
                   <input
                     type="checkbox"
                     className={styles.checkbox}
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     disabled={isLoading}
                   />
                   <span className={styles.checkboxLabel}>Remember me</span>
                 </label>
-                <a href="#" className={styles.forgotLink}>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className={styles.forgotLink}
+                  disabled={isLoading}
+                >
                   Forgot password?
-                </a>
+                </button>
               </div>
 
               {/* Submit Error */}

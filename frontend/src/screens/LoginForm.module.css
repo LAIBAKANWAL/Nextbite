@@ -254,12 +254,90 @@
 .forgotLink {
   font-size: 0.875rem;
   color: rgb(130,174,70);
-  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.2s ease;
 }
 
 .forgotLink:hover {
   color: rgb(166, 202, 115);
+}
+
+.forgotLink:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Forgot Password Modal Styles */
+.forgotPasswordModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background-color: rgba(31, 41, 55, 0.95);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modalHeader h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: rgb(156, 163, 175);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+  color: white;
+}
+
+.successMessage {
+  background-color: rgba(6, 78, 59, 0.5);
+  border: 1px solid rgb(16, 185, 129);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.successMessage p {
+  color: rgb(52, 211, 153);
+  margin: 0;
+  font-size: 0.875rem;
 }
 
 .submitError {

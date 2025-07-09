@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "../css/Navbar.module.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Modal from "../Modal";
 import MyCart from "../screens/MyCart";
 import { useCart } from "./ContextReducer";
@@ -9,6 +9,7 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [cartView, setCartView] = useState(false);
 
   let data = useCart();
@@ -73,10 +74,10 @@ const Navbar = ({ isMenuOpen, toggleMenu, closeMenu }) => {
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
     setIsAuthenticated(false);
     closeMenu();
-    // You might want to redirect to home or login page here
-    // navigate("/login");
+    navigate("/login");
   };
 
   // Helper function to determine if a link is active

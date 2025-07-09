@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 const MyOrder = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,10 @@ const MyOrder = () => {
     });
   };
 
+  const handleStartShopping = () => {
+    navigate("/");
+  };
+
   if (loading) {
     return (
       <>
@@ -175,6 +181,7 @@ const MyOrder = () => {
                     backgroundColor: "#82ae46",
                     color:"white"
                   }}
+                  onClick={handleStartShopping}
                 >
                   Start Shopping
                 </button>
