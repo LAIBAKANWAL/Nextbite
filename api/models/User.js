@@ -22,8 +22,14 @@ const userSchema = new Schema({
   date:{
     type:Date,
     default: Date.now
+  },
+  // Password reset fields
+  resetPasswordToken: {
+    type: String,
+  },
+  resetPasswordExpires: {
+    type: Date,
   }
 });
-
 
 module.exports = mongoose.model('user',userSchema)

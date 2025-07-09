@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 const MyOrder = () => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [orderData, setOrderData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,10 @@ const MyOrder = () => {
     });
   };
 
+  const handleStartShopping = () => {
+    navigate("/");
+  };
+
   if (loading) {
     return (
       <>
@@ -173,6 +179,22 @@ const MyOrder = () => {
                   className="btn"
                   style={{
                     backgroundColor: "#82ae46",
+                    color: "white",
+                    border: "none",
+                    padding: "12px 30px",
+                    borderRadius: "25px",
+                    fontSize: "16px",
+                    fontWeight: "500",
+                    transition: "all 0.3s ease"
+                  }}
+                  onClick={handleStartShopping}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = "#6d8f39";
+                    e.target.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = "#82ae46";
+                    e.target.style.transform = "translateY(0)";
                   }}
                 >
                   Start Shopping

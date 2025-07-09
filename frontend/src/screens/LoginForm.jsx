@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./LoginForm.module.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
@@ -17,9 +18,26 @@ const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem("rememberedCredentials");
+    if (savedCredentials) {
+      try {
+        const { email, password } = JSON.parse(savedCredentials);
+        setFormData({ email, password });
+        setRememberMe(true);
+      } catch (error) {
+        console.error("Error loading saved credentials:", error);
+        localStorage.removeItem("rememberedCredentials");
+      }
+    }
+  }, []);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
@@ -109,6 +127,22 @@ const LoginForm = () => {
     }));
   };
 
+  // Handle remember me checkbox
+  const handleRememberMeChange = (e) => {
+    setRememberMe(e.target.checked);
+    
+    // If unchecked, remove saved credentials
+    if (!e.target.checked) {
+      localStorage.removeItem("rememberedCredentials");
+    }
+  };
+
+  // Handle forgot password click
+  const handleForgotPasswordClick = (e) => {
+    e.preventDefault();
+    setShowForgotModal(true);
+  };
+
   // Validate entire form
   const validateForm = () => {
     const newErrors = {};
@@ -156,6 +190,19 @@ const LoginForm = () => {
         const json = await response.json();
         if (json.success) {
           alert("Login successful!");
+
+          // Handle remember me functionality
+          if (rememberMe) {
+            localStorage.setItem(
+              "rememberedCredentials",
+              JSON.stringify({
+                email: formData.email,
+                password: formData.password,
+              })
+            );
+          } else {
+            localStorage.removeItem("rememberedCredentials");
+          }
 
           // Reset form on success
           setFormData({
@@ -331,11 +378,17 @@ const LoginForm = () => {
                   <input
                     type="checkbox"
                     className={styles.checkbox}
+                    checked={rememberMe}
+                    onChange={handleRememberMeChange}
                     disabled={isLoading}
                   />
                   <span className={styles.checkboxLabel}>Remember me</span>
                 </label>
-                <a href="#" className={styles.forgotLink}>
+                <a
+                  href="#"
+                  className={styles.forgotLink}
+                  onClick={handleForgotPasswordClick}
+                >
                   Forgot password?
                 </a>
               </div>
@@ -387,6 +440,12 @@ const LoginForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+      />
 
       <Footer />
     </div>

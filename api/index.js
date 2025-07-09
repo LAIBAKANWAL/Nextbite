@@ -39,6 +39,9 @@ app.get("/api/foodData", require("./foodData"));
 app.get("/api/foodCategory", require("./foodCategory"));
 app.post("/api/orderData", require("./orderData"));
 app.post("/api/myOrderData", require("./myOrderData"));
+app.get("/api/health", require("./health"));
+app.post("/api/forgotPassword", require("./forgotPassword"));
+app.post("/api/resetPassword", require("./resetPassword"));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,6 +1,7 @@
 import React from "react";
 import Home from "./screens/Home";
 import LoginForm from "./screens/LoginForm";
+import ResetPassword from "./screens/ResetPassword";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -19,6 +20,7 @@ const App = () => {
           <Route exact path="/login" element={<LoginForm />} />
           <Route exact path="/signup" element={<SignupForm />} />
           <Route exact path="/myorder" element={<MyOrder/>} />
+          <Route exact path="/reset-password" element={<ResetPassword/>} />
         </Routes>
       </Router>
     </CartProvider>
