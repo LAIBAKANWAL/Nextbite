@@ -368,8 +368,8 @@
   border: none;
   cursor: pointer;
   background: linear-gradient(135deg, rgb(16, 185, 129), rgb(130,174,70));
-    box-shadow: 0 4px 15px rgba(130,174,70,0.3);
-
+  box-shadow: 0 4px 15px rgba(130,174,70,0.3);
+  margin-top: 2rem; 
 }
 
 .submitButton:hover {
