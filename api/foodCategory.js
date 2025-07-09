@@ -31,61 +31,30 @@ module.exports = async (req, res) => {
     });
     
     await client.connect();
-    console.log("✅ Successfully connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
     
     const db = client.db();
-    console.log("📋 Database name:", db.databaseName);
     
-    // Check what collections exist
-    const collections = await db.listCollections().toArray();
-    console.log("📂 Available collections:", collections.map(c => c.name));
+    // Get products collection and extract unique categories
+    const productsCollection = db.collection("products");
+    console.log("📦 Fetching products to extract categories...");
     
-    // Try different possible collection names
-    const possibleNames = ['categories', 'category', 'Categories', 'Category', 'foodCategories'];
-    let categories = [];
-    let usedCollectionName = '';
+    // Get all products
+    const products = await productsCollection.find({}).toArray();
+    console.log(`📊 Found ${products.length} products`);
     
-    for (const collectionName of possibleNames) {
-      try {
-        console.log(`� Trying collection: ${collectionName}`);
-        const collection = db.collection(collectionName);
-        const count = await collection.countDocuments();
-        console.log(`📊 Collection '${collectionName}' has ${count} documents`);
-        
-        if (count > 0) {
-          categories = await collection.find({}).toArray();
-          usedCollectionName = collectionName;
-          console.log(`✅ Found data in collection: ${collectionName}`);
-          break;
-        }
-      } catch (error) {
-        console.log(`❌ Error checking collection '${collectionName}':`, error.message);
-      }
-    }
+    // Extract unique category names
+    const uniqueCategories = [...new Set(products.map(product => product.categoryName).filter(Boolean))];
+    console.log("�️ Unique categories found:", uniqueCategories);
     
-    if (categories.length > 0) {
-      console.log("🎉 Categories found!");
-      console.log("🔍 Sample category:", JSON.stringify(categories[0], null, 2));
-      console.log("🔍 Category fields:", Object.keys(categories[0]));
-    } else {
-      console.log("❌ No categories found in any collection");
-      console.log("🔍 Available collections:", collections.map(c => c.name));
-      
-      // Check if collections have any data at all
-      for (const collection of collections) {
-        try {
-          const coll = db.collection(collection.name);
-          const count = await coll.countDocuments();
-          const sample = await coll.findOne();
-          console.log(`📊 Collection '${collection.name}': ${count} documents`);
-          if (sample) {
-            console.log(`🔍 Sample from '${collection.name}':`, JSON.stringify(sample, null, 2));
-          }
-        } catch (error) {
-          console.log(`❌ Error checking '${collection.name}':`, error.message);
-        }
-      }
-    }
+    // Create category objects
+    const categories = uniqueCategories.map(categoryName => ({
+      categoryName: categoryName,
+      _id: categoryName.toLowerCase().replace(/\s+/g, '-'), // Create a simple ID
+    }));
+    
+    console.log(`✅ Created ${categories.length} category objects`);
+    console.log("🔍 Sample category:", JSON.stringify(categories[0], null, 2));
 
     await client.close();
     console.log("🔒 MongoDB connection closed");
@@ -95,22 +64,19 @@ module.exports = async (req, res) => {
       data: categories,
       debug: {
         categoriesCount: categories.length,
-        usedCollectionName: usedCollectionName,
-        availableCollections: collections.map(c => c.name),
-        databaseName: db.databaseName,
+        totalProducts: products.length,
+        uniqueCategoryNames: uniqueCategories,
         timestamp: new Date().toISOString()
       }
     });
 
   } catch (error) {
-    console.error("❌ FATAL ERROR in foodCategory:", error);
-    console.error("❌ Error stack:", error.stack);
+    console.error("❌ Error in foodCategory:", error);
     
     return res.status(500).json({
       success: false,
       message: "Server error",
-      error: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: error.message
     });
   }
 };
