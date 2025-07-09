@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -16,4 +16,4 @@ export default function handler(req, res) {
     environment: process.env.NODE_ENV || "development",
     hasMongoUri: !!process.env.MONGODB_URI
   });
-}
+};

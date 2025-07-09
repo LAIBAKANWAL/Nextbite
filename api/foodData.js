@@ -1,8 +1,6 @@
-import { MongoClient } from 'mongodb';
+const { MongoClient } = require('mongodb');
 
-const client = new MongoClient(process.env.MONGODB_URI);
-
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS Headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -13,9 +11,21 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
+  let client;
+  
   try {
+    console.log("🔍 Starting foodData function");
+    console.log("🔍 MongoDB URI exists:", !!process.env.MONGODB_URI);
+    
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI environment variable is not set");
+    }
+
     // Connect to MongoDB
+    client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
+    console.log("✅ Connected to MongoDB");
+    
     const db = client.db();
     
     // Get products collection
@@ -44,6 +54,9 @@ export default async function handler(req, res) {
     });
   } finally {
     // Close connection
-    await client.close();
+    if (client) {
+      await client.close();
+      console.log("🔒 MongoDB connection closed");
+    }
   }
-}
+};
