@@ -35,15 +35,14 @@ const mongoDB = async () => {
       categoriesCollection.find({}).toArray()
     ]);
 
-    if (productsData.length > 0) {
-      global.foodItems = productsData;
-      global.foodCategories = categoriesData;
-      console.log(`📦 Loaded ${productsData.length} food items and ${categoriesData.length} categories`);
-    } else {
-      global.foodItems = [];
-      global.foodCategories = categoriesData; // Still set categories even if no products
-      console.log("⚠️ No products found, using empty array");
-    }
+    global.foodItems = productsData;
+    global.foodCategories = categoriesData;
+    
+    console.log(`📦 Loaded ${productsData.length} food items and ${categoriesData.length} categories`);
+    console.log("🔍 Sample category:", categoriesData[0]);
+    console.log("🔍 Sample product:", productsData[0]);
+    console.log("🔍 Categories field names:", categoriesData.length > 0 ? Object.keys(categoriesData[0]) : "No categories");
+    console.log("🔍 Products field names:", productsData.length > 0 ? Object.keys(productsData[0]) : "No products");
 
   } catch (error) {
     console.error("❌ MongoDB connection error:", error.message);

@@ -31,9 +31,20 @@ module.exports = async (req, res) => {
     // Use global variables set by db.js
     const foodCategories = global.foodCategories || [];
 
+    console.log("🔍 DEBUG: foodCategories count:", foodCategories.length);
+    console.log("🔍 DEBUG: global object keys:", Object.keys(global));
+    console.log("🔍 DEBUG: MongoDB URI exists:", !!process.env.MONGODB_URI);
+    console.log("🔍 DEBUG: Sample category:", foodCategories[0]);
+
     res.status(200).json({ 
       success: true, 
-      data: foodCategories 
+      data: foodCategories,
+      debug: {
+        categoriesCount: foodCategories.length,
+        hasMongoUri: !!process.env.MONGODB_URI,
+        globalKeys: Object.keys(global),
+        timestamp: new Date().toISOString()
+      }
     });
   } catch (error) {
     console.error("Error in /api/foodCategory:", error);
