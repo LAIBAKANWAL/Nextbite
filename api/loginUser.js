@@ -3,20 +3,10 @@
 // Load environment variables (useful for local `vercel dev` testing)
 require("dotenv").config();
 
-// Database connection
-const connectDB = require("./db"); // Adjust path if db.js is not directly in 'api/'
-const User = require("./models/User"); // Adjust path to your User model relative to 'api/'
-
-// Validation utilities
+const { MongoClient } = require('mongodb');
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-// JWT Secret (MUST be set as an environment variable in Vercel Dashboard)
-const jwtSecret = process.env.JWT_SECRET; // Renamed to JWT_SECRET for clarity
-
-// Connect to MongoDB
-connectDB();
 
 // Validation rules for login
 const validateLogin = [
@@ -35,25 +25,42 @@ const runValidation = async (req) => {
   return validationResult(req);
 };
 
-// Main Serverless Function Handler
 module.exports = async (req, res) => {
-  // CORS Headers
-  res.setHeader("Access-Control-Allow-Origin", process.env.FRONTEND_URL || "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  // Handle preflight OPTIONS request
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  // Ensure it's a POST request
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST, OPTIONS");
-    return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
-  }
-
   try {
+    // CORS Headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    // Handle preflight OPTIONS request
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
+
+    // Ensure it's a POST request
+    if (req.method !== "POST") {
+      res.setHeader("Allow", "POST, OPTIONS");
+      return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
+    }
+
+    console.log("🔍 Starting loginUser function");
+    
+    if (!process.env.MONGODB_URI) {
+      console.error("❌ MONGODB_URI not found");
+      return res.status(500).json({
+        success: false,
+        message: "Database configuration error"
+      });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("❌ JWT_SECRET not found");
+      return res.status(500).json({
+        success: false,
+        message: "Authentication configuration error"
+      });
+    }
+
     // Run validations
     const errors = await runValidation(req);
     if (!errors.isEmpty()) {
@@ -65,11 +72,26 @@ module.exports = async (req, res) => {
     }
 
     const { email, password } = req.body;
+    console.log("🔍 Login attempt for email:", email);
+
+    // Connect to MongoDB
+    const client = new MongoClient(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+    });
+    
+    await client.connect();
+    console.log("✅ Connected to MongoDB for login");
+    
+    const db = client.db();
+    const usersCollection = db.collection("users");
 
     // Find user by email
-    const userData = await User.findOne({ email });
+    const userData = await usersCollection.findOne({ email: email });
+    console.log("🔍 User found:", !!userData);
 
     if (!userData) {
+      await client.close();
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -78,7 +100,10 @@ module.exports = async (req, res) => {
 
     // Compare password
     const isPasswordValid = await bcrypt.compare(password, userData.password);
+    console.log("🔍 Password valid:", isPasswordValid);
+    
     if (!isPasswordValid) {
+      await client.close();
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -88,27 +113,33 @@ module.exports = async (req, res) => {
     // Generate JWT
     const data = {
       user: {
-        id: userData.id,
+        id: userData._id.toString(),
       },
     };
 
-    // Ensure jwtSecret is available in Vercel Environment Variables
-    if (!jwtSecret) {
-        throw new Error("JWT_SECRET environment variable is not set.");
-    }
-    const authToken = jwt.sign(data, jwtSecret);
+    const authToken = jwt.sign(data, process.env.JWT_SECRET);
+    console.log("✅ Login successful for user:", userData.name);
+
+    await client.close();
 
     return res.json({
       success: true,
       message: "Login successful",
       authToken: authToken,
+      user: {
+        id: userData._id.toString(),
+        name: userData.name,
+        email: userData.email
+      }
     });
+
   } catch (error) {
-    console.error("Error in /api/loginUser:", error); // Log the actual error
-    res.status(500).json({
+    console.error("❌ Error in loginUser:", error);
+    
+    return res.status(500).json({
       success: false,
       message: "Server error occurred",
-      details: error.message // Include error message for debugging (remove in production if sensitive)
+      error: error.message
     });
   }
 };
