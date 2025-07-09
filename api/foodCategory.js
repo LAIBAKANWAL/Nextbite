@@ -1,62 +1,79 @@
 const { MongoClient } = require('mongodb');
 
 module.exports = async (req, res) => {
-  // CORS Headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  // Handle preflight OPTIONS request
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  let client;
-  
   try {
-    console.log("🔍 Starting foodCategory function");
-    console.log("🔍 MongoDB URI exists:", !!process.env.MONGODB_URI);
-    
-    if (!process.env.MONGODB_URI) {
-      throw new Error("MONGODB_URI environment variable is not set");
+    // CORS Headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    // Handle preflight OPTIONS request
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
     }
 
-    // Connect to MongoDB
-    client = new MongoClient(process.env.MONGODB_URI);
+    console.log("🔍 Starting foodCategory function");
+    console.log("🔍 Environment variables check:");
+    console.log("  - NODE_ENV:", process.env.NODE_ENV);
+    console.log("  - MONGODB_URI exists:", !!process.env.MONGODB_URI);
+    console.log("  - MONGODB_URI length:", process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0);
+    
+    if (!process.env.MONGODB_URI) {
+      console.error("❌ MONGODB_URI not found in environment variables");
+      return res.status(500).json({
+        success: false,
+        message: "Database configuration error",
+        error: "MONGODB_URI environment variable is not set"
+      });
+    }
+
+    // Test MongoDB connection
+    console.log("🔄 Attempting to connect to MongoDB...");
+    const client = new MongoClient(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+    });
+    
     await client.connect();
-    console.log("✅ Connected to MongoDB");
+    console.log("✅ Successfully connected to MongoDB");
     
     const db = client.db();
+    console.log("📋 Database name:", db.databaseName);
     
     // Get categories collection
     const categoriesCollection = db.collection("categories");
+    console.log("📦 Attempting to fetch categories...");
+    
     const categories = await categoriesCollection.find({}).toArray();
+    console.log(`✅ Found ${categories.length} categories`);
+    
+    if (categories.length > 0) {
+      console.log("🔍 Sample category:", JSON.stringify(categories[0], null, 2));
+    }
 
-    console.log(`📦 Found ${categories.length} categories`);
-    console.log("🔍 Sample category:", categories[0]);
+    await client.close();
+    console.log("🔒 MongoDB connection closed successfully");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: categories,
       debug: {
         categoriesCount: categories.length,
-        hasMongoUri: !!process.env.MONGODB_URI,
-        timestamp: new Date().toISOString()
+        hasMongoUri: true,
+        timestamp: new Date().toISOString(),
+        dbName: db.databaseName
       }
     });
 
   } catch (error) {
-    console.error("❌ Error in foodCategory:", error);
-    res.status(500).json({
+    console.error("❌ FATAL ERROR in foodCategory:", error);
+    console.error("❌ Error stack:", error.stack);
+    
+    return res.status(500).json({
       success: false,
-      message: "Error fetching categories",
-      error: error.message
+      message: "Server error",
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
-  } finally {
-    // Close connection
-    if (client) {
-      await client.close();
-      console.log("🔒 MongoDB connection closed");
-    }
   }
 };
