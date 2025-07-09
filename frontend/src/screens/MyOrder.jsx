@@ -163,8 +163,8 @@ const MyOrder = () => {
         <div className="container mt-5">
           <div className="row justify-content-center">
             <div className="col-md-8">
-              <div className="text-center">
-                <div className="mb-5">
+              <div className="text-center mt-4">
+                <div className="mb-5 mt-5">
                   <i className="bi bi-bag display-1 text-muted"></i>
                 </div>
                 <h3 className="text-muted">No Orders Found</h3>
@@ -173,6 +173,7 @@ const MyOrder = () => {
                   className="btn"
                   style={{
                     backgroundColor: "#82ae46",
+                    color:"white"
                   }}
                 >
                   Start Shopping
